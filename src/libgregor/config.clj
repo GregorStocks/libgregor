@@ -5,17 +5,21 @@
             [clojure.spec :as s]))
 
 (s/def :libgregor/default (constantly true))
-(s/def :libgregor/config-option (s/keys :opt [:libgregor/default]))
+(s/def :libgregor/config-option (s/keys :opt [:libgregor/default :libgregor/parse-fn]))
 (s/def :libgregor/config-options (s/map-of keyword? :libgregor/config-option))
 
 (defn base-options [app-name]
   {:app-name {:libgregor/default app-name}
-   :port {:libgregor/default 4000}
-   :run-server? {:libgregor/default true}
-   :init-db? {:libgregor/default true}
+   :port {:libgregor/default 4000
+          :libgregor/parse-fn #(Long/parseLong %)}
+   :run-server? {:libgregor/default true
+                 :libgregor/prase-fn (partial = "true")}
+   :init-db? {:libgregor/default true
+              :libgregor/prase-fn (partial = "true")}
    :db-type {:libgregor/default "sqlite"}
    :db-path {:libgregor/default (str "db/" app-name ".sqlite")}
-   :db-port {:libgregor/default 5432}
+   :db-port {:libgregor/default 5432
+             :libgregor/parse-fn #(Long/parseLong %)}
    :db-database {}
    :db-username {}
    :db-password {}})
@@ -26,9 +30,11 @@
 
 (defn environmental-overrides [app-name options]
   (s/assert :libgregor/config-options options)
-  (into {} (for [[k v] options]
+  (into {} (for [[k option] options]
              (when-let [v (env k)]
-               [k v]))))
+               (if-let [f (:libgregor/parse-fn option)]
+                 [k (f v)]
+                 [k v])))))
 
 (defn make [app-name config-options overrides]
   (log/info config-options)
