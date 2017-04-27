@@ -44,6 +44,9 @@
 (defn insert! [database table-name & xs]
   (apply sql/insert! (:conn database) table-name xs))
 
+(defn insert-multi! [database table-name & xs]
+  (apply sql/insert-multi! (:conn database) table-name xs))
+
 (defn init-tables! [database]
   (let [conn (:conn database)]
     (doseq [[k v] (:table-specs database)]
