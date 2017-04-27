@@ -39,7 +39,9 @@
 (defn make [app-name config-options overrides]
   (log/info config-options)
   (s/assert :libgregor/config-options config-options)
-  (let [combined (merge (base-options app-name) config-options)]
+  (let [combined (merge-with merge
+                             (base-options app-name)
+                             config-options)]
     (merge (default-config combined)
            overrides
            (environmental-overrides app-name combined))))
