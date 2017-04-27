@@ -25,7 +25,10 @@
                      table-specs]
   component/Lifecycle
   (start [this]
-    (assoc this :conn (new-connection config)))
+    (let [result (assoc this :conn (new-connection config))]
+      (when (:init-db? config)
+        (init-tables! result))
+      result))
 
   (stop [this]
     (when-let [c (:conn this)]

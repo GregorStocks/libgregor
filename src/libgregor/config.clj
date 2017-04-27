@@ -13,9 +13,9 @@
    :port {:libgregor/default 4000
           :libgregor/parse-fn #(Long/parseLong %)}
    :run-server? {:libgregor/default true
-                 :libgregor/prase-fn (partial = "true")}
+                 :libgregor/parse-fn (partial = "true")}
    :init-db? {:libgregor/default true
-              :libgregor/prase-fn (partial = "true")}
+              :libgregor/parse-fn (partial = "true")}
    :db-type {:libgregor/default "sqlite"}
    :db-path {:libgregor/default (str "db/" app-name ".sqlite")}
    :db-port {:libgregor/default 5432
