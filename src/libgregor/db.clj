@@ -5,36 +5,6 @@
             [clojure.set :as set]
             [clojure.java.jdbc :as sql]))
 
-(defn new-connection [config]
-  (let [spec (merge
-              (case (:db-type config)
-                "sqlite" {:classname "org.sqlite.JDBC"
-                          :subprotocol "sqlite"
-                          :subname (:db-path config)}
-                "postgres" {:dbtype "postgresql"
-                            :dbname (:db-database config)
-                            :host (:db-path config)
-                            :port (:db-port config)}
-                (throw (ex-info "Unsupported db-type" {:config config})))
-              {:user (:db-username config)
-               :password (:db-password config)})]
-    (log/info "Using spec" spec)
-    {:connection (sql/get-connection spec)}))
-
-(defrecord Database [config
-                     table-specs]
-  component/Lifecycle
-  (start [this]
-    (let [result (assoc this :conn (new-connection config))]
-      (when (:init-db? config)
-        (init-tables! result))
-      result))
-
-  (stop [this]
-    (when-let [c (:conn this)]
-      (.close (:connection c)))
-    (assoc this :conn nil)))
-
 (defn query [database q & args]
   (apply sql/query (:conn database) q args))
 
@@ -52,6 +22,7 @@
 
 (defn init-tables! [database]
   (let [conn (:conn database)]
+    (log/info "Creating for" database)
     (doseq [[k v] (:table-specs database)]
       (try
         (log/info "Creating" k)
@@ -66,4 +37,33 @@
       (execute! database (sql/drop-table-ddl k))
       (catch Exception e
         (log/warn e)))))
+
+(defn new-connection [config]
+  (let [spec (merge
+              (case (:db-type config)
+                "sqlite" {:classname "org.sqlite.JDBC"
+                          :subprotocol "sqlite"
+                          :subname (:db-path config)}
+                "postgres" {:dbtype "postgresql"
+                            :dbname (:db-database config)
+                            :host (:db-path config)
+                            :port (:db-port config)}
+                (throw (ex-info "Unsupported db-type" {:config config})))
+              {:user (:db-username config)
+               :password (:db-password config)})]
+    {:connection (sql/get-connection spec)}))
+
+(defrecord Database [config
+                     table-specs]
+  component/Lifecycle
+  (start [this]
+    (let [result (assoc this :conn (new-connection config))]
+      (when (:init-db? config)
+        (init-tables! result))
+      result))
+
+  (stop [this]
+    (when-let [c (:conn this)]
+      (.close (:connection c)))
+    (assoc this :conn nil)))
 

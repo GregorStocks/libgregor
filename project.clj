@@ -1,4 +1,4 @@
-(defproject gregor-stocks/libgregor "0.3.0-SNAPSHOT"
+(defproject gregor-stocks/libgregor "0.4.0-SNAPSHOT"
   :description "Stuff Gregor uses"
   :url "https://github.com/GregorStocks/libgregor"
   :license {:name "MIT License"
