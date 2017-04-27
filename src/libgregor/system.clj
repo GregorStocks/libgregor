@@ -6,13 +6,13 @@
             [libgregor.handler :as handler]))
 
 (defn build-system [{:keys [app-name
-                             config-spec
-                             table-specs
-                             app
-                             overrides]
-                      :as system-spec}]
+                            config-options
+                            table-specs
+                            app
+                            overrides]
+                     :as system-spec}]
   (component/system-map
-   :config (config/make app-name config-spec overrides)
+   :config (config/make app-name config-options overrides)
    :database (component/using (db/map->Database {:table-specs table-specs}) [:config])
    :app (component/using (handler/map->App {:app app}) [:database :config])))
 

@@ -9,13 +9,13 @@
 (s/def :libgregor/config-options (s/map-of keyword? :libgregor/config-option))
 
 (defn base-options [app-name]
-  {:app-name app-name
-   :port {:default 4000}
-   :run-server? {:default true}
-   :init-db? {:default true}
-   :db-type {:default "sqlite"}
-   :db-path {:default (str "db/" app-name ".sqlite")}
-   :db-port {:default 5432}
+  {:app-name {:libgregor/default app-name}
+   :port {:libgregor/default 4000}
+   :run-server? {:libgregor/default true}
+   :init-db? {:libgregor/default true}
+   :db-type {:libgregor/default "sqlite"}
+   :db-path {:libgregor/default (str "db/" app-name ".sqlite")}
+   :db-port {:libgregor/default 5432}
    :db-database {}
    :db-username {}
    :db-password {}})
@@ -31,6 +31,7 @@
                [k v]))))
 
 (defn make [app-name config-options overrides]
+  (log/info config-options)
   (s/assert :libgregor/config-options config-options)
   (let [combined (merge (base-options app-name) config-options)]
     (merge (default-config combined)
